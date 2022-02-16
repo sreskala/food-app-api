@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using AutoMapper;
 using food_tracker_api.Services.StoragePlaceService;
 
 namespace food_tracker_api
@@ -33,6 +34,7 @@ namespace food_tracker_api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "food_tracker_api", Version = "v1" });
             });
+            services.AddAutoMapper(typeof(Startup));
             services.AddScoped<IStoragePlaceService, StoragePlaceService>();
         }
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using food_tracker_api.Models;
 using food_tracker_api.Services.StoragePlaceService;
+using food_tracker_api.Dtos.StoragePlace;
 
 namespace food_tracker_api.Controllers
 {
@@ -25,19 +26,37 @@ namespace food_tracker_api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<StoragePlace>>> Get()
+        public async Task<ActionResult<ServiceResponse<List<GetStoragePlaceDTO>>>> Get()
         {
             return Ok(await _storagePlaceService.GetAllStoragePlaces());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<StoragePlace>> GetById(int id) {
+        public async Task<ActionResult<ServiceResponse<GetStoragePlaceDTO>>> GetById(int id) {
             return Ok(await _storagePlaceService.GetStoragePlaceById(id));
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<StoragePlace>>> AddStoragePlace(StoragePlace newStorage) {
+        public async Task<ActionResult<ServiceResponse<List<GetStoragePlaceDTO>>>> AddStoragePlace(AddStoragePlaceDTO newStorage) {
             return Ok(await _storagePlaceService.AddStoragePlace(newStorage));
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<ServiceResponse<GetStoragePlaceDTO>>> UpdateStoragePlace(UpdateStoragePlaceDTO updatedStoragePlace) {
+            var response = await _storagePlaceService.UpdateStoragePlace(updatedStoragePlace);
+            if (response.Data == null) {
+                return NotFound(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ServiceResponse<List<GetStoragePlaceDTO>>>> DeleteStoragePlace(int id) {
+            var response = await _storagePlaceService.DeleteStoragePlace(id);
+            if (response.Data == null) {
+                return NotFound(response);
+            }
+            return Ok(response);
         }
     }
 }
