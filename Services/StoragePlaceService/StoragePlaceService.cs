@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using food_tracker_api.Models;
 using food_tracker_api.Dtos.StoragePlace;
+using food_tracker_api.Data;
 
 
 namespace food_tracker_api.Services.StoragePlaceService
@@ -12,6 +14,7 @@ namespace food_tracker_api.Services.StoragePlaceService
     public class StoragePlaceService : IStoragePlaceService
     {
         private readonly IMapper _mapper;
+        private readonly DataContext _context;
         private static List<StoragePlace> storagePlaces = new List<StoragePlace> {
             new StoragePlace{
                 Id = 1,
@@ -32,14 +35,17 @@ namespace food_tracker_api.Services.StoragePlaceService
                 StorageLocation = "Middle of the kitchen"
             }
         };
-        public StoragePlaceService(IMapper mapper)
+        public StoragePlaceService(IMapper mapper, DataContext context)
         {
             _mapper = mapper;
+            _context = context;
         }
         public async Task<ServiceResponse<List<GetStoragePlaceDTO>>> GetAllStoragePlaces()
         {
             var serviceResponse = new ServiceResponse<List<GetStoragePlaceDTO>>();
-            serviceResponse.Data = storagePlaces.Select(s => _mapper.Map<GetStoragePlaceDTO>(s)).ToList();
+            var dbStoragePlaces = await _context.StoragePlaces.ToListAsync();
+
+            serviceResponse.Data = dbStoragePlaces.Select(s => _mapper.Map<GetStoragePlaceDTO>(s)).ToList();
 
             return serviceResponse;
         }
@@ -47,7 +53,9 @@ namespace food_tracker_api.Services.StoragePlaceService
         public async Task<ServiceResponse<GetStoragePlaceDTO>> GetStoragePlaceById(int id)
         {
             var serviceResponse = new ServiceResponse<GetStoragePlaceDTO>();
-            serviceResponse.Data = _mapper.Map<GetStoragePlaceDTO>(storagePlaces.FirstOrDefault(s => s.Id == id));
+            var storagePlace = await _context.StoragePlaces.FirstOrDefaultAsync(s => s.Id == id);
+
+            serviceResponse.Data = _mapper.Map<GetStoragePlaceDTO>(storagePlace);
 
             return serviceResponse;
         }
@@ -55,8 +63,12 @@ namespace food_tracker_api.Services.StoragePlaceService
         public async Task<ServiceResponse<List<GetStoragePlaceDTO>>> AddStoragePlace(AddStoragePlaceDTO newStoragePlace)
         {
             var serviceResponse = new ServiceResponse<List<GetStoragePlaceDTO>>();
-            storagePlaces.Add(_mapper.Map<StoragePlace>(newStoragePlace));
-            serviceResponse.Data = storagePlaces.Select(s => _mapper.Map<GetStoragePlaceDTO>(s)).ToList();
+            StoragePlace storagePlace = _mapper.Map<StoragePlace>(newStoragePlace);
+            
+            await _context.StoragePlaces.AddAsync(storagePlace);
+            await _context.SaveChangesAsync();
+
+            serviceResponse.Data = await _context.StoragePlaces.Select(s => _mapper.Map<GetStoragePlaceDTO>(s)).ToListAsync();
 
             return serviceResponse;
         }
@@ -67,11 +79,13 @@ namespace food_tracker_api.Services.StoragePlaceService
 
             try
             {
-                StoragePlace storagePlace = storagePlaces.FirstOrDefault(s => s.Id == updatedStoragePlace.Id);
+                StoragePlace storagePlace = await _context.StoragePlaces.FirstOrDefaultAsync(s => s.Id == updatedStoragePlace.Id);
 
                 storagePlace.Name = updatedStoragePlace.Name;
                 storagePlace.StorageLocation = updatedStoragePlace.StorageLocation;
                 storagePlace.CurrentCapacity = updatedStoragePlace.CurrentCapacity;
+
+                await _context.SaveChangesAsync();
 
                 serviceResponse.Data = _mapper.Map<GetStoragePlaceDTO>(storagePlace);
             }
@@ -90,11 +104,11 @@ namespace food_tracker_api.Services.StoragePlaceService
 
             try
             {
-                StoragePlace storagePlace = storagePlaces.First(s => s.Id == id);
+                StoragePlace storagePlace = await _context.StoragePlaces.FirstAsync(s => s.Id == id);
+                _context.StoragePlaces.Remove(storagePlace);
+                await _context.SaveChangesAsync();
 
-                storagePlaces.Remove(storagePlace);
-
-                serviceResponse.Data = storagePlaces.Select(s => _mapper.Map<GetStoragePlaceDTO>(s)).ToList();
+                serviceResponse.Data = await _context.StoragePlaces.Select(s => _mapper.Map<GetStoragePlaceDTO>(s)).ToListAsync();
             }
             catch (Exception ex)
             {
