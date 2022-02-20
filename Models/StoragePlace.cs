@@ -9,5 +9,6 @@ namespace food_tracker_api.Models
         public int CurrentCapacity { get; set; }
         public bool IsFull { get; set; }
         public string StorageLocation { get; set; }
+        public User User { get; set; }
     }
 }
