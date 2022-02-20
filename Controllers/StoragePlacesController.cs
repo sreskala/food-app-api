@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using food_tracker_api.Models;
 using food_tracker_api.Services.StoragePlaceService;
@@ -11,6 +12,7 @@ using food_tracker_api.Dtos.StoragePlace;
 
 namespace food_tracker_api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class StoragePlacesController : ControllerBase
