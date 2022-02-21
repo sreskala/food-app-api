@@ -11,5 +11,6 @@ namespace food_tracker_api.Data
 
         public DbSet<StoragePlace> StoragePlaces { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<FoodItem> FoodItems { get; set; }
     }
 }

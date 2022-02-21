@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace food_tracker_api.Models
 {
     public class StoragePlace
@@ -10,5 +12,6 @@ namespace food_tracker_api.Models
         public bool IsFull { get; set; }
         public string StorageLocation { get; set; }
         public User User { get; set; }
+        public List<FoodItem> FoodItems { get; set; }
     }
 }
